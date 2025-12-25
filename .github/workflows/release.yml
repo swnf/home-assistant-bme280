@@ -9,8 +9,27 @@ permissions:
   contents: read # for checkout
 
 jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12' 
+      - name: Install dependencies
+        run: pip install poetry==2.2.1 && poetry install
+      - name: Check formatting
+        run: poetry run black --check .
+    
   release:
     name: Release
+    # Should be after checks, see https://semantic-release.gitbook.io/semantic-release/usage/ci-configuration#run-semantic-release-only-after-all-tests-succeeded
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release
